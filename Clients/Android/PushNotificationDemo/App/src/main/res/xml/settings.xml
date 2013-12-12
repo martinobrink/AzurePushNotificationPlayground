@@ -3,7 +3,12 @@
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
     <EditTextPreference
         android:key="settings_backend_url"
-        android:title="Backend url"
+        android:title="Backend URL"
         android:defaultValue="http://google.dk"
+        />
+    <EditTextPreference
+        android:key="settings_username"
+        android:title="Username"
+        android:defaultValue="Batman77"
         />
 </PreferenceScreen>
