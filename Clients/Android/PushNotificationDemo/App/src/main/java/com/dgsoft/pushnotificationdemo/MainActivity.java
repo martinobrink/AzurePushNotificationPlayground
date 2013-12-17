@@ -3,6 +3,7 @@ package com.dgsoft.pushnotificationdemo;
 import android.app.Activity;
 import android.app.Fragment;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
@@ -50,13 +51,18 @@ public class MainActivity extends Activity {
         context = getApplicationContext();
         gcm = GoogleCloudMessaging.getInstance(this);
 
-        new RegisterBackground(context).execute();
-
         if (savedInstanceState == null) {
             getFragmentManager().beginTransaction()
                     .add(R.id.container, new MainFragment())
                     .commit();
         }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        
+        new RegisterBackground(context).execute();
     }
 
     @Override
@@ -121,12 +127,13 @@ public class MainActivity extends Activity {
 
         private void sendRegistrationIdToBackend(String registrationId) {
 
-            String backendBaseUrl = getPreferenceString(SettingsActivity.SETTINGS_KEY_BACKEND_URL);
+            String backendBaseUrl = readStringFromSharedPreferences(SettingsActivity.SETTINGS_KEY_BACKEND_URL);
             PushNotificationClient client = new PushNotificationClient(backendBaseUrl);
             Device device = createDevice(registrationId);
             client.registerDevice(device, new Callback<Device>() {
                 @Override
                 public void success(Device device, Response response) {
+                    writeStringToSharedPreferences(SettingsActivity.SETTINGS_KEY_DEVICEGUID, device.DeviceGuid);
                     Toast.makeText(context, "Successfully registered with backend! Received GUID:" + device.DeviceGuid, Toast.LENGTH_LONG).show();
                 }
 
@@ -144,7 +151,8 @@ public class MainActivity extends Activity {
             Device device = new Device();
             device.Platform = "Android";
             device.Token = registrationId;
-            device.UserName = getPreferenceString(SettingsActivity.SETTINGS_KEY_USERNAME);
+            device.UserName = readStringFromSharedPreferences(SettingsActivity.SETTINGS_KEY_USERNAME);
+            device.DeviceGuid = readStringFromSharedPreferences(SettingsActivity.SETTINGS_KEY_DEVICEGUID);
             //todo set device.PlatformDescription based on Android version
             device.SubscriptionCategories = new ArrayList<String>();
             device.SubscriptionCategories.add("hest");
@@ -153,10 +161,17 @@ public class MainActivity extends Activity {
             return device;
         }
 
-        private String getPreferenceString(String preferenceKey) {
+        private String readStringFromSharedPreferences(String preferenceKey) {
             return PreferenceManager
                             .getDefaultSharedPreferences(context)
                             .getString(preferenceKey, "");
+        }
+
+        private void writeStringToSharedPreferences(String preferenceKey, String value) {
+            SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
+            SharedPreferences.Editor editor = sharedPreferences.edit();
+            editor.putString(preferenceKey, value);
+            editor.commit();
         }
     }
 }
