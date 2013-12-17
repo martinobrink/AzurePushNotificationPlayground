@@ -3,8 +3,10 @@ package com.dgsoft.pushnotificationdemo;
 import android.app.Activity;
 import android.app.Fragment;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -13,6 +15,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 
+import com.dgsoft.pushnotificationdemo.backend.PushNotificationClient;
 import com.google.android.gms.gcm.GoogleCloudMessaging;
 
 import android.content.Context;
@@ -22,18 +25,20 @@ import android.widget.Toast;
 
 import java.io.IOException;
 
+import retrofit.Callback;
+import retrofit.RetrofitError;
+import retrofit.client.Response;
+
 public class MainActivity extends Activity {
-
-    public static final String EXTRA_MESSAGE = "message";
-    public static final String PROPERTY_REG_ID = "registration_id";
     //SENDER_ID below: Please create your own senderid/projectnumber using google apis console instead of using mine :)
-    String SENDER_ID = "337436325121";
-    private static final String TAG = "GCMDemo";
+    private String SENDER_ID = "337436325121";
+    //public static final String EXTRA_MESSAGE = "message";
+    //public static final String PROPERTY_REG_ID = "registration_id";
+    private static final String TAG = "PushNotificationDemo";
     private GoogleCloudMessaging gcm;
-
-    TextView regIdTextView;
-    Context context;
-    String regid;
+    private TextView regIdTextView;
+    private Context context;
+    private String registrationId;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -42,34 +47,27 @@ public class MainActivity extends Activity {
 
         regIdTextView = (TextView) findViewById(R.id.regIdTextView);
         context = getApplicationContext();
-
         gcm = GoogleCloudMessaging.getInstance(this);
 
-        new RegisterBackground().execute();
+        new RegisterBackground(context).execute();
 
         if (savedInstanceState == null) {
             getFragmentManager().beginTransaction()
-                    .add(R.id.container, new PlaceholderFragment())
+                    .add(R.id.container, new MainFragment())
                     .commit();
         }
     }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        
-        // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.main, menu);
         return true;
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
         if (id == R.id.action_settings) {
-
             Intent settingsIntent = new Intent(this, SettingsActivity.class);
             startActivity(settingsIntent);
             return true;
@@ -77,12 +75,9 @@ public class MainActivity extends Activity {
         return super.onOptionsItemSelected(item);
     }
 
-    /**
-     * A placeholder fragment containing a simple view.
-     */
-    public static class PlaceholderFragment extends Fragment {
+    public static class MainFragment extends Fragment {
 
-        public PlaceholderFragment() {
+        public MainFragment() {
         }
 
         @Override
@@ -92,25 +87,29 @@ public class MainActivity extends Activity {
         }
     }
 
-    class RegisterBackground extends AsyncTask<String,String,String> {
+    private class RegisterBackground extends AsyncTask<String,String,String> {
+        private Context context;
+
+        public RegisterBackground(Context context) {
+            this.context = context;
+        }
 
         @Override
         protected String doInBackground(String... arg0) {
-            // TODO Auto-generated method stub
-            String msg = "";
+            String message = "";
             try {
                 if (gcm == null) {
                     gcm = GoogleCloudMessaging.getInstance(context);
                 }
-                regid = gcm.register(SENDER_ID);
-                msg = "Device registered, registration ID=" + regid;
-                Log.d("111", msg);
-                sendRegistrationIdToBackend(regid);
+                registrationId = gcm.register(SENDER_ID);
+                message = "Device registered, registration id=" + registrationId;
+                Log.d(TAG, message);
+                sendRegistrationIdToBackend(registrationId);
 
             } catch (IOException ex) {
-                msg = "Error :" + ex.getMessage();
+                message = "Error :" + ex.getMessage();
             }
-            return msg;
+            return message;
         }
 
         @Override
@@ -118,8 +117,27 @@ public class MainActivity extends Activity {
             Toast.makeText(context, msg, Toast.LENGTH_LONG).show();
             //regIdTextView.append(msg + "\n");
         }
-    private void sendRegistrationIdToBackend(String regid) {
-        Log.i(TAG, regid);
-        // this code will send registration id of a device to our own server.
-    }}
+
+        private void sendRegistrationIdToBackend(String registrationId) {
+
+            String backendBaseUrl = PreferenceManager
+                    .getDefaultSharedPreferences(context)
+                    .getString(SettingsActivity.SETTINGS_KEY_BACKEND_URL, "");
+            PushNotificationClient client = new PushNotificationClient(backendBaseUrl);
+            client.performSearch("hest", new Callback<String>() {
+                @Override
+                public void success(String s, Response response) {
+                    Toast.makeText(context, "RESULT:" + s, Toast.LENGTH_LONG).show();
+                }
+
+                @Override
+                public void failure(RetrofitError retrofitError) {
+                    Toast.makeText(context, "ERROR:" + retrofitError.getMessage(), Toast.LENGTH_LONG).show();
+                }
+            });
+
+            Log.i(TAG, registrationId);
+            // this code will send registration id of a device to our own server.
+        }
+    }
 }
