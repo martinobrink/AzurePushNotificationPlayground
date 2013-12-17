@@ -43,9 +43,10 @@ namespace PushNotificationDemo.WebApiBackend.Controllers
         }
 
         // DELETE api/device
-        public void Delete()
+        public IHttpActionResult Delete()
         {
             _devices.Clear();
+            return Ok();
         }
     }
 }
