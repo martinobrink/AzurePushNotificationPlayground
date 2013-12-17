@@ -1,5 +1,6 @@
-package com.dgsoft.pushnotificationdemo;
+package com.dgsoft.pushnotificationdemo.gcm;
 
+import com.dgsoft.pushnotificationdemo.MainActivity;
 import com.google.android.gms.gcm.GoogleCloudMessaging;
 
 import android.app.IntentService;

@@ -1,4 +1,4 @@
-package com.dgsoft.pushnotificationdemo;
+package com.dgsoft.pushnotificationdemo.gcm;
 
 import android.app.Activity;
 import android.content.ComponentName;
