@@ -14,13 +14,14 @@ namespace PushNotificationDemo.WebApiBackend.Models
         [JsonConverter(typeof(StringEnumConverter))]
         [Required]
         public PlatformType Platform { get; set; }
+        [Required]
+        public string UserName { get; set; }
         public string PlatformDescription { get; set; }
         public List<string> SubscriptionCategories { get; set; }
     }
 
     public enum PlatformType
     {
-        Undefined = 0,
         Android = 1,
         iOS = 2,
         WindowsPhone = 3,
