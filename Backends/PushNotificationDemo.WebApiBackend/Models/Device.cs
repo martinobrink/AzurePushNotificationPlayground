@@ -16,6 +16,7 @@ namespace PushNotificationDemo.WebApiBackend.Models
         public PlatformType Platform { get; set; }
         [Required]
         public string UserName { get; set; }
+        public DateTime TimeStamp { get; set; }
         public string PlatformDescription { get; set; }
         public List<string> SubscriptionCategories { get; set; }
     }

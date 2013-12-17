@@ -37,6 +37,8 @@ namespace PushNotificationDemo.WebApiBackend.Controllers
                 device.DeviceGuid = Guid.NewGuid().ToString();
             }
 
+            device.TimeStamp = DateTime.UtcNow;
+
             _devices[device.DeviceGuid] = device;
 
             return Ok(device);
