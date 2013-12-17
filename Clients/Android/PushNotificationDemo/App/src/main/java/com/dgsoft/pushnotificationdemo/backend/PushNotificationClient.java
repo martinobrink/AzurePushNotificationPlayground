@@ -17,11 +17,6 @@ public class PushNotificationClient implements PushNotificationBackendService {
     }
 
     @Override
-    public void performSearch(@Path("query") String query, Callback<String> callback) {
-        client.performSearch(query, callback);
-    }
-
-    @Override
     public void registerDevice(@Body Device device, Callback<Device> callback) {
         client.registerDevice(device, callback);
     }

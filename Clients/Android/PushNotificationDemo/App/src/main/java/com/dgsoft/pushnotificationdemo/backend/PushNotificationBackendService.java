@@ -10,10 +10,6 @@ import retrofit.http.Path;
 
 public interface PushNotificationBackendService {
 
-    //performSearch() only added for testing purposes
-    @GET("/#q={query}")
-    void performSearch(@Path("query") String query, Callback<String> callback);
-
-    @PUT("/device")
+    @PUT("/api/device")
     void registerDevice(@Body Device device, Callback<Device> callback);
 }

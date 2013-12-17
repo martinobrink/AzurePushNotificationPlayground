@@ -3,7 +3,6 @@ package com.dgsoft.pushnotificationdemo;
 import android.app.Activity;
 import android.app.Fragment;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
@@ -16,6 +15,7 @@ import android.view.ViewGroup;
 
 
 import com.dgsoft.pushnotificationdemo.backend.PushNotificationClient;
+import com.dgsoft.pushnotificationdemo.model.Device;
 import com.google.android.gms.gcm.GoogleCloudMessaging;
 
 import android.content.Context;
@@ -24,6 +24,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import java.io.IOException;
+import java.util.ArrayList;
 
 import retrofit.Callback;
 import retrofit.RetrofitError;
@@ -120,14 +121,13 @@ public class MainActivity extends Activity {
 
         private void sendRegistrationIdToBackend(String registrationId) {
 
-            String backendBaseUrl = PreferenceManager
-                    .getDefaultSharedPreferences(context)
-                    .getString(SettingsActivity.SETTINGS_KEY_BACKEND_URL, "");
+            String backendBaseUrl = getPreferenceString(SettingsActivity.SETTINGS_KEY_BACKEND_URL);
             PushNotificationClient client = new PushNotificationClient(backendBaseUrl);
-            client.performSearch("hest", new Callback<String>() {
+            Device device = createDevice(registrationId);
+            client.registerDevice(device, new Callback<Device>() {
                 @Override
-                public void success(String s, Response response) {
-                    Toast.makeText(context, "RESULT:" + s, Toast.LENGTH_LONG).show();
+                public void success(Device device, Response response) {
+                    Toast.makeText(context, "Successfully registered with backend! Received GUID:" + device.DeviceGuid, Toast.LENGTH_LONG).show();
                 }
 
                 @Override
@@ -138,6 +138,25 @@ public class MainActivity extends Activity {
 
             Log.i(TAG, registrationId);
             // this code will send registration id of a device to our own server.
+        }
+
+        private Device createDevice(String registrationId) {
+            Device device = new Device();
+            device.Platform = "Android";
+            device.Token = registrationId;
+            device.UserName = getPreferenceString(SettingsActivity.SETTINGS_KEY_USERNAME);
+            //todo set device.PlatformDescription based on Android version
+            device.SubscriptionCategories = new ArrayList<String>();
+            device.SubscriptionCategories.add("hest");
+            device.SubscriptionCategories.add("hund");
+            device.SubscriptionCategories.add("hippo");
+            return device;
+        }
+
+        private String getPreferenceString(String preferenceKey) {
+            return PreferenceManager
+                            .getDefaultSharedPreferences(context)
+                            .getString(preferenceKey, "");
         }
     }
 }
