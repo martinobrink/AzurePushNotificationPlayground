@@ -1,18 +1,20 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using System.Web.Http;
 using PushNotificationDemo.WebApiBackend.Models;
+using Raven.Client;
 
 namespace PushNotificationDemo.WebApiBackend.Controllers
 {
-    public class DeviceController : ApiController
+    public class DeviceController : BaseController
     {
         private static readonly Dictionary<string, Device> _devices = new Dictionary<string, Device>();
 
         // GET api/device
-        public IEnumerable<Device> Get()
+        public Task<IList<Device>> Get()
         {
-            return _devices.Values;
+            return Session.Query<Device>().ToListAsync();
         }
 
         // GET api/device/44809e3f-ebe0-4bdf-8aaf-2c6581496ef2
@@ -30,7 +32,7 @@ namespace PushNotificationDemo.WebApiBackend.Controllers
         }
 
         // PUT api/device
-        public IHttpActionResult Put([FromBody]Device device)
+        public async Task<IHttpActionResult> Put([FromBody]Device device)
         {
             if (String.IsNullOrEmpty(device.DeviceGuid))
             {
@@ -39,7 +41,9 @@ namespace PushNotificationDemo.WebApiBackend.Controllers
 
             device.TimeStamp = DateTime.UtcNow;
 
-            _devices[device.DeviceGuid] = device;
+            await Session.StoreAsync(device);
+            
+            //_devices[device.DeviceGuid] = device;
 
             return Ok(device);
         }
@@ -47,7 +51,8 @@ namespace PushNotificationDemo.WebApiBackend.Controllers
         // DELETE api/device
         public IHttpActionResult Delete()
         {
-            _devices.Clear();
+            //_devices.Clear();
+            Session.DeleteAll<Device>();
             return Ok();
         }
     }
