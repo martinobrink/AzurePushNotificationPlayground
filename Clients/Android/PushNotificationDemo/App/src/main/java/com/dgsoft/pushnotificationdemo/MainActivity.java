@@ -61,7 +61,7 @@ public class MainActivity extends Activity {
     @Override
     protected void onResume() {
         super.onResume();
-        
+
         new RegisterBackground(context).execute();
     }
 
@@ -128,6 +128,12 @@ public class MainActivity extends Activity {
         private void sendRegistrationIdToBackend(String registrationId) {
 
             String backendBaseUrl = readStringFromSharedPreferences(SettingsActivity.SETTINGS_KEY_BACKEND_URL);
+            if (backendBaseUrl == null || backendBaseUrl == "")
+            {
+                //Toast.makeText(context, "Please set backend url in settings in order to register with backend!", Toast.LENGTH_LONG).show();
+                return;
+            }
+
             PushNotificationClient client = new PushNotificationClient(backendBaseUrl);
             Device device = createDevice(registrationId);
             client.registerDevice(device, new Callback<Device>() {
