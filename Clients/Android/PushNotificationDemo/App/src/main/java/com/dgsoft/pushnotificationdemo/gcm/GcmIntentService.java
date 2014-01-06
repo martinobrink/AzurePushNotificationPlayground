@@ -1,6 +1,7 @@
 package com.dgsoft.pushnotificationdemo.gcm;
 
 import com.dgsoft.pushnotificationdemo.MainActivity;
+import com.dgsoft.pushnotificationdemo.R;
 import com.google.android.gms.gcm.GoogleCloudMessaging;
 
 import android.app.IntentService;
@@ -9,50 +10,32 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import android.os.SystemClock;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 
 public class GcmIntentService extends IntentService{
-    public static final int NOTIFICATION_ID = 1;
-    private NotificationManager mNotificationManager;
-    NotificationCompat.Builder builder;
     public static final String TAG = "GCM Demo";
+    public static final int NOTIFICATION_ID = 1;
+    private NotificationManager notificationManager;
 
     public GcmIntentService() {
         super("GcmIntentService");
-        // TODO Auto-generated constructor stub
     }
 
     @Override
     protected void onHandleIntent(Intent intent) {
-        // TODO Auto-generated method stub
         Bundle extras = intent.getExtras();
         GoogleCloudMessaging gcm = GoogleCloudMessaging.getInstance(this);
         String messageType = gcm.getMessageType(intent);
         if (!extras.isEmpty()) {
 
-            if (GoogleCloudMessaging.
-                    MESSAGE_TYPE_SEND_ERROR.equals(messageType)) {
+            if (GoogleCloudMessaging.MESSAGE_TYPE_SEND_ERROR.equals(messageType)) {
                 sendNotification("Send error: " + extras.toString());
-            } else if (GoogleCloudMessaging.
-                    MESSAGE_TYPE_DELETED.equals(messageType)) {
-                sendNotification("Deleted messages on server: " +
-                        extras.toString());
-                // If it's a regular GCM message, do some work.
-            } else if (GoogleCloudMessaging.
-                    MESSAGE_TYPE_MESSAGE.equals(messageType)) {
-                // This loop represents the service doing some work.
-                for (int i=0; i<5; i++) {
-                    Log.i(TAG, "Working... " + (i+1)
-                            + "/5 @ " + SystemClock.elapsedRealtime());
-                    try {
-                        Thread.sleep(5000);
-                    } catch (InterruptedException e) {
-                    }
-                }
-                Log.i(TAG, "Completed work @ " + SystemClock.elapsedRealtime());
-                // Post notification of received message.
+            } else if (GoogleCloudMessaging.MESSAGE_TYPE_DELETED.equals(messageType)) {
+                sendNotification("Deleted messages on server: " + extras.toString());
+            } else if (GoogleCloudMessaging.MESSAGE_TYPE_MESSAGE.equals(messageType)) {
+                // A regular GCM message was received, if work needs to be done it can be done here
+                // e.g. deserialize json data received in extras
                 sendNotification("Received: " + extras.toString());
                 Log.i(TAG, "Received: " + extras.toString());
             }
@@ -60,22 +43,17 @@ public class GcmIntentService extends IntentService{
         GcmBroadcastReceiver.completeWakefulIntent(intent);
     }
     private void sendNotification(String msg) {
-        mNotificationManager = (NotificationManager)
-                this.getSystemService(Context.NOTIFICATION_SERVICE);
-
-        PendingIntent contentIntent = PendingIntent.getActivity(this, 0,
-                new Intent(this, MainActivity.class), 0);
-
-        NotificationCompat.Builder mBuilder =
+        notificationManager = (NotificationManager)this.getSystemService(Context.NOTIFICATION_SERVICE);
+        PendingIntent contentIntent = PendingIntent.getActivity(this, 0, new Intent(this, MainActivity.class), 0);
+        NotificationCompat.Builder builder =
                 new NotificationCompat.Builder(this)
-                        //.setSmallIcon(R.drawable.ic_stat_gcm)
                         .setContentTitle("GCM Notification")
-                        .setStyle(new NotificationCompat.BigTextStyle()
-                                .bigText(msg))
-                        .setContentText(msg);
+                        .setContentText(msg)
+                        .setSubText("some sub text")
+                        .setSmallIcon(R.drawable.ic_launcher)
+                        .setStyle(new NotificationCompat.BigTextStyle().bigText(msg))
+                        .setContentIntent(contentIntent);
 
-        mBuilder.setContentIntent(contentIntent);
-        mNotificationManager.notify(NOTIFICATION_ID, mBuilder.build());
+        notificationManager.notify(NOTIFICATION_ID, builder.build());
     }
-
 }
