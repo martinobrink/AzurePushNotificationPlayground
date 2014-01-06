@@ -11,7 +11,7 @@ namespace PushNotificationDemo.WebApiBackend.Controllers
     public class DeviceController : BaseController
     {
         //please replace the connectionString and notificationHubName fields below with your own notification hub connection info
-        private const string _connectionString = "Endpoint=sb://pushdemo.servicebus.windows.net/;SharedAccessKeyName=DefaultFullSharedAccessSignature;SharedAccessKey=EUiFujVDXSyxbc15otZyxCd6SQK4i/2fxbKO3q8+Nz0=";
+        private const string _connectionString = "Endpoint=sb://pushdemo.servicebus.windows.net/;SharedAccessKeyName=DefaultFullSharedAccessSignature;SharedAccessKey=VOQDgU/RZ9QhCZsIlJLgVBs0Gq8VFK1lEhXnr6HMPHs=";
         private const string _notificationHubName = "pushdemo";
         private readonly NotificationHubClient _hubClient;
 
