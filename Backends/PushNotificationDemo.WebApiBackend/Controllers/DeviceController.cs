@@ -78,9 +78,9 @@ namespace PushNotificationDemo.WebApiBackend.Controllers
 
         private async Task<RegistrationDescription> RegisterDeviceWithNotificationHub(Device device)
         {
-            var hubTags = new HashSet<string>()
-                .Add("user", new[] { device.UserName })
-                .Add("category", device.SubscriptionCategories);
+            var hubTags = new HashSet<string> {device.UserName};
+                //.Add("user", new[] { device.UserName })
+                //.Add("category", device.SubscriptionCategories);
 
             var hubRegistrationId = device.HubRegistrationId ?? "0";//null or empty string as query input throws exception
             var hubRegistration = await _hubClient.GetRegistrationAsync<RegistrationDescription>(hubRegistrationId);
