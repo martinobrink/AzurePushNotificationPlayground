@@ -67,7 +67,6 @@ namespace PushNotificationDemo.WebApiBackend.Controllers
 
             return Ok(deviceToSave);
         }
-
         
         // DELETE api/device
         public IHttpActionResult Delete()
