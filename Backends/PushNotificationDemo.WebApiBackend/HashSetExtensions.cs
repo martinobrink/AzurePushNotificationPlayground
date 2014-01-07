@@ -8,7 +8,7 @@ namespace PushNotificationDemo.WebApiBackend
         {
             foreach (var item in itemsToAdd)
             {
-                hashSet.Add(prefix + ":" + item);
+                hashSet.Add(prefix + ":" + item.Replace(" ", "_"));
             }
 
             return hashSet;
