@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Text;
 using System.Threading.Tasks;
 using System.Web.Http;
 using Microsoft.ServiceBus.Notifications;
+using Newtonsoft.Json;
 using Raven.Client;
 using Notification = PushNotificationDemo.WebApiBackend.Models.Notification;
 using System.Linq;
@@ -27,7 +29,7 @@ namespace PushNotificationDemo.WebApiBackend.Controllers
             return Session.Query<Notification>().ToListAsync();
         }
 
-        // PUT api/device
+        // POST api/notification
         public async Task<IHttpActionResult> Post([FromBody]Notification notification)
         {
             var notificationToSave = new Notification
@@ -35,9 +37,11 @@ namespace PushNotificationDemo.WebApiBackend.Controllers
                     NotificationGuid = Guid.NewGuid().ToString(),
                     TimeStamp = DateTime.UtcNow,
                     Message = notification.Message,
+                    SenderName = notification.SenderName,
                     Recipients = new List<string>()
                 };
 
+            var recipientNamesString = new StringBuilder();
             var registrationDescriptions = await _hubClient.GetAllRegistrationsAsync(500);
             foreach (var registration in registrationDescriptions)
             {
@@ -49,11 +53,21 @@ namespace PushNotificationDemo.WebApiBackend.Controllers
                         .FirstOrDefault();
                     userName = userName ?? "Unknown User";
                     notificationToSave.Recipients.Add(userName);
+                    recipientNamesString.Append(userName + "#");
                 }
             }
+            
+            string notificationJsonPayload = 
+                "{\"data\" : " +
+                "   {" +
+                "   \"message\": \"" + notificationToSave.Message + "\"," +
+                "   \"senderName\": \"" + notificationToSave.SenderName + "\"," +
+                "   \"recipientNames\": \"" + recipientNamesString + "\"" +
+                "   }" +
+                "}";
 
-            var result = await _hubClient.SendGcmNativeNotificationAsync("{ message : \"" + notification.Message + "\"}");
-
+            var result = await _hubClient.SendGcmNativeNotificationAsync(notificationJsonPayload);
+            
             notificationToSave.TrackingId = result.TrackingId;
 
             await Session.StoreAsync(notificationToSave);
