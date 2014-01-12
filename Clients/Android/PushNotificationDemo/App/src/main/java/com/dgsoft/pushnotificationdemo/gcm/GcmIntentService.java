@@ -45,16 +45,20 @@ public class GcmIntentService extends IntentService{
         GcmBroadcastReceiver.completeWakefulIntent(intent);
     }
     private void createNotification(String message, String senderName, String recipientNames) {
+        Intent notificationIntent = new Intent(this, MainActivity.class);
+        notificationIntent.setAction(Intent.ACTION_MAIN);
+        notificationIntent.addCategory(Intent.CATEGORY_LAUNCHER);
+        PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, notificationIntent, 0);
         notificationManager = (NotificationManager)this.getSystemService(Context.NOTIFICATION_SERVICE);
-        PendingIntent contentIntent = PendingIntent.getActivity(this, 0, new Intent(this, MainActivity.class), 0);
         NotificationCompat.Builder builder =
                 new NotificationCompat.Builder(this)
+                        .setAutoCancel(true)
                         .setContentTitle(senderName + " says:")
                         .setContentText( "\"" + message + "\"")
                         .setSubText("Recipients: " + recipientNames.replace("#", ","))
                         .setSmallIcon(R.drawable.ic_launcher)
                         .setStyle(new NotificationCompat.BigTextStyle().bigText(message))
-                        .setContentIntent(contentIntent);
+                        .setContentIntent(pendingIntent);
 
         notificationManager.notify(NOTIFICATION_ID, builder.build());
     }
