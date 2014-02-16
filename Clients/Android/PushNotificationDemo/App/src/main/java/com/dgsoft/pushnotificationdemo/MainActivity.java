@@ -14,7 +14,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 
-
 import com.dgsoft.pushnotificationdemo.backend.PushNotificationClient;
 import com.dgsoft.pushnotificationdemo.model.Device;
 import com.google.android.gms.gcm.GoogleCloudMessaging;
@@ -150,7 +149,6 @@ public class MainActivity extends Activity {
             });
 
             Log.i(TAG, registrationId);
-            // this code will send registration id of a device to our own server.
         }
 
         private Device createDevice(String registrationId) {
