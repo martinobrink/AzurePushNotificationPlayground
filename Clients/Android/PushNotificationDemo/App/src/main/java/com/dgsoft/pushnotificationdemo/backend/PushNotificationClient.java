@@ -1,10 +1,10 @@
 package com.dgsoft.pushnotificationdemo.backend;
 
 import com.dgsoft.pushnotificationdemo.model.Device;
+
 import retrofit.Callback;
 import retrofit.RestAdapter;
 import retrofit.http.Body;
-import retrofit.http.Path;
 
 public class PushNotificationClient implements PushNotificationBackendService {
     private PushNotificationBackendService client;
