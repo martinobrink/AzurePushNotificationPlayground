@@ -1,9 +1,5 @@
 package com.dgsoft.pushnotificationdemo.gcm;
 
-import com.dgsoft.pushnotificationdemo.MainActivity;
-import com.dgsoft.pushnotificationdemo.R;
-import com.google.android.gms.gcm.GoogleCloudMessaging;
-
 import android.app.IntentService;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -13,37 +9,38 @@ import android.os.Bundle;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 
+import com.dgsoft.pushnotificationdemo.MainActivity;
+import com.dgsoft.pushnotificationdemo.R;
+import com.google.android.gms.gcm.GoogleCloudMessaging;
+
 public class GcmIntentService extends IntentService{
     public static final String TAG = "GCM Demo";
     public static final int NOTIFICATION_ID = 1;
     private NotificationManager notificationManager;
 
     public GcmIntentService() {
-        super("GcmIntentService");
+        super(GcmIntentService.class.getName());
     }
 
     @Override
     protected void onHandleIntent(Intent intent) {
-        Bundle extras = intent.getExtras();
         GoogleCloudMessaging gcm = GoogleCloudMessaging.getInstance(this);
         String messageType = gcm.getMessageType(intent);
-        if (!extras.isEmpty()) {
-
-            if (GoogleCloudMessaging.MESSAGE_TYPE_SEND_ERROR.equals(messageType)) {
-                //createNotification("Send error: " + extras.toString());
-            } else if (GoogleCloudMessaging.MESSAGE_TYPE_DELETED.equals(messageType)) {
-                //createNotification("Deleted messages on server: " + extras.toString());
-            } else if (GoogleCloudMessaging.MESSAGE_TYPE_MESSAGE.equals(messageType)) {
-                String message = extras.getString("message");
-                String senderName = extras.getString("senderName");
-                String recipientNames = extras.getString("recipientNames");
-                //String[] recipientList = recipientNames.split("#");
-                createNotification(message, senderName, recipientNames);
-                Log.i(TAG, "Received: " + extras.toString());
-            }
+        Bundle extras = intent.getExtras();
+        Log.i(TAG, "Received extras: " + extras.toString());
+        if (GoogleCloudMessaging.MESSAGE_TYPE_SEND_ERROR.equals(messageType)) {
+            createNotification("Send error occured!", "GCM", "NONE");
+        } else if (GoogleCloudMessaging.MESSAGE_TYPE_DELETED.equals(messageType)) {
+            createNotification("Messages deleted on the server!", "GCM", "NONE");
+        } else if (GoogleCloudMessaging.MESSAGE_TYPE_MESSAGE.equals(messageType)) {
+            String message = extras.getString("message");
+            String senderName = extras.getString("senderName");
+            String recipientNames = extras.getString("recipientNames");
+            createNotification(message, senderName, recipientNames);
         }
-        GcmBroadcastReceiver.completeWakefulIntent(intent);
+        GcmBroadcastReceiver.completeWakefulIntent(intent);//Signals "work completed", must be called to release wakelock
     }
+
     private void createNotification(String message, String senderName, String recipientNames) {
         Intent notificationIntent = new Intent(this, MainActivity.class);
         notificationIntent.setAction(Intent.ACTION_MAIN);
